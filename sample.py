@@ -46,7 +46,7 @@ def run(config):
   config = utils.update_config_roots(config)
   config['skip_init'] = True
   config['no_optim'] = True
-  device = 'cuda'
+  device = 'cpu'
   
   # Seed RNG
   utils.seed_rng(config['seed'])
@@ -60,7 +60,7 @@ def run(config):
                        else utils.name_from_config(config))
   print('Experiment name is %s' % experiment_name)
   
-  G = model.Generator(**config).cuda()
+  G = model.Generator(**config).cpu()
   utils.count_parameters(G)
   
   # Load weights
@@ -128,11 +128,12 @@ def run(config):
                          experiment_name=experiment_name,
                          folder_number=config['sample_sheet_folder_num'], 
                          sheet_number=0,
-                         fix_z=fix_z, fix_y=fix_y, device='cuda')
+                         fix_z=fix_z, fix_y=fix_y, device='cpu')
   # Sample random sheet
   if config['sample_random']:
     print('Preparing random sample sheet...')
-    images, labels = sample()    
+    images, labels = sample()
+    images = torch.tensor(images.clone().detach())
     torchvision.utils.save_image(images.float(),
                                  '%s/%s/random_samples.jpg' % (config['samples_root'], experiment_name),
                                  nrow=int(G_batch_size**0.5),

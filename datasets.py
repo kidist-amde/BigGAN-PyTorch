@@ -7,7 +7,7 @@ import sys
 from PIL import Image
 import numpy as np
 from tqdm import tqdm, trange
-
+import glob
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from torchvision.datasets.utils import download_url, check_integrity
@@ -360,3 +360,49 @@ class CIFAR100(CIFAR10):
     test_list = [
         ['test', 'f0ef6b0ae62326f3e7ffdfab6717acfc'],
     ]
+
+class UTKfaceDataset(data.Dataset):
+
+  def __init__(self, root,transform=None,train=True,
+           target_transform=None,
+           download=True, validate_seed=0,
+           val_split=0, load_in_mem=True, **kwargs):
+    self.path = root
+    self.transform = transform
+    self.image_paths = []
+    print(self.path)
+    for file_path in glob.glob(self.path + "*.jpg"):
+      self.image_paths.append(file_path)
+
+    train_size  = int(0.2*len(self.image_paths))
+    np.random.shuffle(self.image_paths)
+    self.image_paths = self.image_paths[:train_size]
+    print(len(self.image_paths))
+  
+  def __getitem__(self, index):
+    """
+    Args:
+        index (int): Index
+    Returns:
+        tuple: (image, target) where target is index of the target class.
+    """
+    image_path = self.image_paths[index]
+    # race lable is 3 whixh is at index 2
+    #The labels of each face image is embedded in the file name, formated like
+    # [age]_[gender]_[race]_[date&time].jpg
+    try:
+
+      target = int(image_path.split("_")[2])
+    except:
+      target = 4
+    # read image and convert to RGB
+    img = Image.open(image_path).convert("RGB")
+
+    if self.transform is not None:
+      img = self.transform(img)
+
+    return img, target
+      
+  def __len__(self):
+      return len(self.image_paths)
+      

@@ -47,7 +47,7 @@ def run(config):
     print('Skipping initialization for training resumption...')
     config['skip_init'] = True
   config = utils.update_config_roots(config)
-  device = 'cuda'
+  device = 'cpu'
   
   # Seed RNG
   utils.seed_rng(config['seed'])
