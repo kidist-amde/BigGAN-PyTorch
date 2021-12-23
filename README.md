@@ -1,6 +1,6 @@
 # BigGAN-PyTorch
 
-Modifications for UTK-Face dataset
+# Modifications for UTK-Face dataset
 
 The UTK-Face dataset has been used to experiment with the robustness of the BigGAN model in terms of the size of the dataset. 
 
