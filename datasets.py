@@ -406,4 +406,12 @@ class UTKfaceDataset(data.Dataset):
       
   def __len__(self):
       return len(self.image_paths)
-      
+class UTKfacePartialDataset(UTKfaceDataset):
+  def __init__(self, root,transform=None,train=True,
+           target_transform=None,
+           download=True, validate_seed=0,
+           val_split=0, load_in_mem=True, **kwargs):
+      super().__init__(root,transform,train,target_transform,download,validate_seed,val_split,load_in_mem,**kwargs)
+      train_size  = int(0.2*len(self.image_paths))
+      self.image_paths = self.image_paths[:train_size]
+

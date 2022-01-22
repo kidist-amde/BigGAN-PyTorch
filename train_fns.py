@@ -129,7 +129,7 @@ def save_and_sample(G, D, G_ema, z_, y_, fixed_z, fixed_y,
                                                   experiment_name,
                                                   state_dict['itr'])
   fixed_Gz = torch.tensor(fixed_Gz.clone().detach())
-  torchvision.utils.save_image(fixed_Gz.float().cpu(), image_filename,
+  torchvision.utils.save_image(torch.from_numpy(fixed_Gz.float().cpu().numpy()), image_filename,
                              nrow=int(fixed_Gz.shape[0] **0.5), normalize=True)
   # For now, every time we save, also save sample sheets
   utils.sample_sheet(which_G,
