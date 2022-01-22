@@ -11,6 +11,7 @@
     numbers. This code tends to produce IS values that are 5-10% lower than
     those obtained through TF. 
 '''    
+from os import device_encoding
 import numpy as np
 from scipy import linalg # For numpy FID
 import time
@@ -21,6 +22,7 @@ import torch.nn.functional as F
 from torch.nn import Parameter as P
 from torchvision.models.inception import inception_v3
 
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
 
 # Module that wraps the inception network to enable use with dataparallel and
 # returning pool features and logits.
@@ -29,9 +31,9 @@ class WrapInception(nn.Module):
     super(WrapInception,self).__init__()
     self.net = net
     self.mean = P(torch.tensor([0.485, 0.456, 0.406]).view(1, -1, 1, 1),
-                  requires_grad=False)
+                  requires_grad=False).to(device)
     self.std = P(torch.tensor([0.229, 0.224, 0.225]).view(1, -1, 1, 1),
-                 requires_grad=False)
+                 requires_grad=False).to(device)
   def forward(self, x):
     # Normalize x
     x = (x + 1.) / 2.0
