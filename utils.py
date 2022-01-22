@@ -26,6 +26,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 import datasets as dset
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
 
 def prepare_parser():
   usage = 'Parser for all scripts.'
@@ -725,29 +726,29 @@ def load_weights(G, D, state_dict, weights_root, experiment_name,
   if G is not None:
     G.load_state_dict(
       torch.load('%s/%s.pth' % (root, join_strings('_', ['G', name_suffix]))\
-      ,map_location = torch.device("cpu")),
+      ,map_location = device),
       strict=strict)
     if load_optim:
       G.optim.load_state_dict(
         torch.load('%s/%s.pth' % (root, join_strings('_', ['G_optim', name_suffix]))\
-        ,map_location = torch.device("cpu")))
+        ,map_location = device))
   if D is not None:
     D.load_state_dict(
       torch.load('%s/%s.pth' % (root, join_strings('_', ['D', name_suffix]))\
-      ,map_location = torch.device("cpu")),
+      ,map_location = device),
       strict=strict)
     if load_optim:
       D.optim.load_state_dict(
         torch.load('%s/%s.pth' % (root, join_strings('_', ['D_optim', name_suffix]))\
-        ,map_location = torch.device("cpu")))
+        ,map_location = device))
   # Load state dict
   for item in state_dict:
     state_dict[item] = torch.load('%s/%s.pth' % (root, join_strings('_', ['state_dict', name_suffix]))\
-    ,map_location = torch.device("cpu"))[item]
+    ,map_location = device)[item]
   if G_ema is not None:
     G_ema.load_state_dict(
       torch.load('%s/%s.pth' % (root, join_strings('_', ['G_ema', name_suffix]))\
-      ,map_location = torch.device("cpu")),
+      ,map_location = device),
       strict=strict)
 
 
@@ -896,12 +897,12 @@ def sample_sheet(G, classes_per_sheet, num_classes, samples_per_class, parallel,
   # loop over total number of sheets
   for i in range(num_classes // classes_per_sheet):
     ims = []
-    y = torch.arange(i * classes_per_sheet, (i + 1) * classes_per_sheet, device='cpu')
+    y = torch.arange(i * classes_per_sheet, (i + 1) * classes_per_sheet, device=device)
     for j in range(samples_per_class):
       if (z_ is not None) and hasattr(z_, 'sample_') and classes_per_sheet <= z_.size(0):
         z_.sample_()
       else:
-        z_ = torch.randn(classes_per_sheet, G.dim_z, device='cpu')        
+        z_ = torch.randn(classes_per_sheet, G.dim_z, device=device)        
       with torch.no_grad():
         if parallel:
           o = nn.parallel.data_parallel(G, (z_[:classes_per_sheet], G.shared(y)))
@@ -921,7 +922,7 @@ def sample_sheet(G, classes_per_sheet, num_classes, samples_per_class, parallel,
 
 # Interp function; expects x0 and x1 to be of shape (shape0, 1, rest_of_shape..)
 def interp(x0, x1, num_midpoints):
-  lerp = torch.linspace(0, 1.0, num_midpoints + 2, device='cpu').to(x0.dtype)
+  lerp = torch.linspace(0, 1.0, num_midpoints + 2, device=device).to(x0.dtype)
   return ((x0 * (1 - lerp.view(1, -1, 1))) + (x1 * lerp.view(1, -1, 1)))
 
 
@@ -929,7 +930,7 @@ def interp(x0, x1, num_midpoints):
 # Supports full, class-wise and intra-class interpolation
 def interp_sheet(G, num_per_sheet, num_midpoints, num_classes, parallel,
                  samples_root, experiment_name, folder_number, sheet_number=0,
-                 fix_z=False, fix_y=False, device='cpu'):
+                 fix_z=False, fix_y=False, device=device):
   # Prepare zs and ys
   if fix_z: # If fix Z, only sample 1 z per row
     zs = torch.randn(num_per_sheet, 1, G.dim_z, device=device)
@@ -1056,7 +1057,7 @@ def count_parameters(module):
 
    
 # Convenience function to sample an index, not actually a 1-hot
-def sample_1hot(batch_size, num_classes, device='cpu'):
+def sample_1hot(batch_size, num_classes, device=device):
   return torch.randint(low=0, high=num_classes, size=(batch_size,),
           device=device, dtype=torch.int64, requires_grad=False)
 
@@ -1095,7 +1096,7 @@ class Distribution(torch.Tensor):
 
 
 # Convenience function to prepare a z and y vector
-def prepare_z_y(G_batch_size, dim_z, nclasses, device='cpu', 
+def prepare_z_y(G_batch_size, dim_z, nclasses, device=device, 
                 fp16=False,z_var=1.0):
   z_ = Distribution(torch.randn(G_batch_size, dim_z, requires_grad=False))
   z_.init_distribution('normal', mean=0, var=z_var)

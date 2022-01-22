@@ -31,6 +31,7 @@ from sync_batchnorm import patch_replication_callback
 
 # The main training file. Config is a dictionary specifying the configuration
 # of this training run.
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
 def run(config):
 
   # Update the config dict as necessary
@@ -47,7 +48,6 @@ def run(config):
     print('Skipping initialization for training resumption...')
     config['skip_init'] = True
   config = utils.update_config_roots(config)
-  device = 'cpu'
   
   # Seed RNG
   utils.seed_rng(config['seed'])

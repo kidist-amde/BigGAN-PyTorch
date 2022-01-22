@@ -15,7 +15,7 @@ import utils
 import inception_utils
 from tqdm import tqdm, trange
 from argparse import ArgumentParser
-
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
 def prepare_parser():
   usage = 'Calculate and store inception metrics.'
   parser = ArgumentParser(description=usage)
@@ -54,7 +54,6 @@ def run(config):
   # Load inception net
   net = inception_utils.load_inception_net(parallel=config['parallel'])
   pool, logits, labels = [], [], []
-  device = 'cpu'
   for i, (x, y) in enumerate(tqdm(loaders[0])):
     x = x.to(device)
     with torch.no_grad():

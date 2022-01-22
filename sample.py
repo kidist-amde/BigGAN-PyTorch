@@ -18,6 +18,7 @@ import torchvision
 import inception_utils
 import utils
 import losses
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
 
 
 
@@ -46,7 +47,6 @@ def run(config):
   config = utils.update_config_roots(config)
   config['skip_init'] = True
   config['no_optim'] = True
-  device = 'cpu'
   
   # Seed RNG
   utils.seed_rng(config['seed'])
@@ -128,7 +128,7 @@ def run(config):
                          experiment_name=experiment_name,
                          folder_number=config['sample_sheet_folder_num'], 
                          sheet_number=0,
-                         fix_z=fix_z, fix_y=fix_y, device='cpu')
+                         fix_z=fix_z, fix_y=fix_y, device=device)
   # Sample random sheet
   if config['sample_random']:
     print('Preparing random sample sheet...')
