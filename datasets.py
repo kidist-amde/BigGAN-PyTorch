@@ -374,10 +374,11 @@ class UTKfaceDataset(data.Dataset):
     for file_path in glob.glob(self.path + "*.jpg"):
       self.image_paths.append(file_path)
 
-    train_size  = int(0.2*len(self.image_paths))
+    train_size  = len(self.image_paths)
     np.random.shuffle(self.image_paths)
     self.image_paths = self.image_paths[:train_size]
     print(len(self.image_paths))
+  
   
   def __getitem__(self, index):
     """
