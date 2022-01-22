@@ -29,7 +29,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 class WrapInception(nn.Module):
   def __init__(self, net):
     super(WrapInception,self).__init__()
-    self.net = net
+    self.net = net.to(device)
     self.mean = P(torch.tensor([0.485, 0.456, 0.406]).view(1, -1, 1, 1),
                   requires_grad=False).to(device)
     self.std = P(torch.tensor([0.229, 0.224, 0.225]).view(1, -1, 1, 1),
@@ -281,7 +281,7 @@ def prepare_inception_metrics(dataset, parallel, no_fid=False):
   data_mu = np.load(dataset+'_inception_moments.npz')['mu']
   data_sigma = np.load(dataset+'_inception_moments.npz')['sigma']
   # Load network
-  net = load_inception_net(parallel)
+  net = load_inception_net(parallel).to(device)
   def get_inception_metrics(sample, num_inception_images, num_splits=10, 
                             prints=True, use_torch=True):
     if prints:
