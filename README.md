@@ -1,4 +1,22 @@
 # BigGAN-PyTorch
+
+# Modifications for UTK-Face dataset
+
+The UTK-Face dataset has been used to experiment with the robustness of the BigGAN model in terms of the size of the dataset. 
+
+I have implemented and added the UTK-Face dataset classes inside the [dataset.py](https://github.com/kidist-amde/BigGAN-PyTorch/blob/master/datasets.py). To deal with limited resources, the resolution of the images has been reduced to 32x32 images.
+
+
+I have trained the model for 2000 iterations with two setups
+
+* With a full dataset ( 23708 images)
+* With 20% of the data(4741 images)
+
+I got a 1.896  inception score for the model trained with the first setup and a 1.731 inception score for the second model. 
+
+The models are trained for the same number of iterations(with the same batch size). The scores seem very close, which suggests that the BigGAN model learns to generate realistic images even when we have smaller sets. In addition, the images generated from the two models also look similar. 
+______________________________________________________________________________________________________________________________________________________
+
 The author's officially unofficial PyTorch BigGAN implementation.
 
 ![Dogball? Dogball!](imgs/header_image.jpg?raw=true "Dogball? Dogball!")
