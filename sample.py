@@ -60,7 +60,7 @@ def run(config):
                        else utils.name_from_config(config))
   print('Experiment name is %s' % experiment_name)
   
-  G = model.Generator(**config).cpu()
+  G = model.Generator(**config).to(device)
   utils.count_parameters(G)
   
   # Load weights
