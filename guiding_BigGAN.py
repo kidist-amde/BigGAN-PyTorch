@@ -30,7 +30,7 @@ class ConditionalBigGAN(nn.Module):
         # resize images (32,32)generated_images to (224,224)race_classfier
         self.upsample = nn.UpsamplingNearest2d(size = 224)
     def forward(self,inputs,image_generation=False):
-        onehot_inputs = nn.functional.one_hot(inputs).float().squeeze(1)
+        onehot_inputs = nn.functional.one_hot(inputs,num_classes=5).float().squeeze(1)
         mu_sigma = self.input_generator(onehot_inputs)
         mu = mu_sigma[:,:self.output_dim]
         sigma = mu_sigma[:,self.output_dim:]
