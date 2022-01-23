@@ -105,7 +105,7 @@ def load_BigGAN_generator(config):
 def main():
     batch_size = 64
     learning_rate = 1e-3
-    epochs = 1000
+    epochs = 10
     #parse command line and run    
     parser = utils.prepare_parser()
     parser = utils.add_sample_parser(parser)
