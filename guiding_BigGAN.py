@@ -1,5 +1,6 @@
 import functools
 import math
+from pickle import FALSE
 import numpy as np
 from tqdm import tqdm
 import torch
@@ -28,7 +29,7 @@ class ConditionalBigGAN(nn.Module):
         self.input_generator = InputGenerator(input_dim,self.output_dim)
         # resize images (32,32)generated_images to (224,224)race_classfier
         self.upsample = nn.UpsamplingNearest2d(size = 224)
-    def forward(self,inputs):
+    def forward(self,inputs,image_generation=False):
         onehot_inputs = nn.functional.one_hot(inputs).float().squeeze(1)
         mu_sigma = self.input_generator(onehot_inputs)
         mu = mu_sigma[:,:self.output_dim]
@@ -40,6 +41,8 @@ class ConditionalBigGAN(nn.Module):
         z = mu+sigma * eps 
         # generat images 
         images = self.G(z,self.G.shared(inputs))  
+        if image_generation:
+            return images
         images = self.upsample(images)
         outputs = self.classifier(images)
         return outputs
