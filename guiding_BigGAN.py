@@ -34,7 +34,7 @@ class ConditionalBigGAN(nn.Module):
         # to make sigma postive 
         sigma = nn.functional.softplus(sigma) 
         # generat random input z (epslon)
-        eps = torch.randn(*mu.shape)
+        eps = torch.randn(*mu.shape).to(device)
         z = mu+sigma * eps 
         # generat images 
         images = self.G(z,self.G.shared(inputs))  
@@ -110,23 +110,24 @@ def main():
     print(config)
     G = load_BigGAN_generator(config)
     G_batch_size = max(config['G_batch_size'], config['batch_size']) 
-    z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
-                             device=device, fp16=config['G_fp16'], 
-                             z_var=config['z_var'])
-    images = G(z_,G.shared(y_))  
-    print(images.shape)
-    images = torch.tensor(images.clone().detach())
-    torchvision.utils.save_image(images.float(),
-                                 'km.jpg' ,
-                                nrow=int(G_batch_size**0.5),
-                                 normalize=True)
+    # z_, y_ = utils.prepare_z_y(G_batch_size, G.dim_z, config['n_classes'],
+    #                          device=device, fp16=config['G_fp16'], 
+    #                          z_var=config['z_var'])
+    # images = G(z_,G.shared(y_))  
+    # print(images.shape)
+    # images = torch.tensor(images.clone().detach())
+    # torchvision.utils.save_image(images.float(),
+    #                              'km.jpg' ,
+    #                             nrow=int(G_batch_size**0.5),
+    #                              normalize=True)
     race_classifier = torch.load("models/race_classfier.pt")
     cGAN = ConditionalBigGAN(G,race_classifier,5)
+    cGAN = cGAN.to(device)
     # freez model params
     for param in race_classifier.parameters():
           param.requires_grad=False
     for param in G.parameters():
-          param.requires_grad=False         
+        param.requires_grad=False         
     # generate input
     inputs = torch.randint(0,5,size=(32,))
     outputs = cGAN(inputs)
