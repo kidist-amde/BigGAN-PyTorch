@@ -45,7 +45,7 @@ def main():
     norm_std = [0.5,0.5,0.5]
     batch_size = 64
     learning_rate = 1e-3
-    epochs = 20
+    epochs = 200
     images_folder = "data/UTKFace/"
     image_paths = []
     for file_path in glob.glob(images_folder + "*.jpg"):
@@ -71,16 +71,16 @@ def main():
     state_dict = torch.load("vgg_face_dag.pth")
     model.load_state_dict(state_dict)
     # freez the other layer
-    for param in model.parameters():
-          param.requires_grad = False
+    # for param in model.parameters():
+    #       param.requires_grad = False
     model.fc6 = torch.nn.Linear(in_features=512, out_features=512, bias=True) 
     model.fc7 = torch.nn.Linear(in_features=512, out_features=1024, bias=True)
     model.fc8 = torch.nn.Linear(in_features=1024, out_features=5, bias=True)
     model = model.to(device)
     train_loader = DataLoader(train_dataset,batch_size = batch_size,shuffle = True,drop_last = True)
     val_loader = DataLoader(validation_dataset,batch_size = batch_size,shuffle = False,drop_last = False)
-    params = list(model.fc8.parameters()) +list(model.fc7.parameters()) +list(model.fc6.parameters())
-    optimizer =torch.optim.SGD(params,lr = learning_rate,momentum=0.9)
+    # params = list(model.fc8.parameters()) +list(model.fc7.parameters()) +list(model.fc6.parameters())
+    optimizer =torch.optim.SGD(model.parameters(),lr = learning_rate,momentum=0.9)
     criterion = torch.nn.CrossEntropyLoss()
     # save the best model
     best_acc = 0
