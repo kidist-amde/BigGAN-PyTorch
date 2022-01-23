@@ -43,7 +43,8 @@ class UTKfaceDataset(Dataset):
 def main():
     norm_mean = [0.5,0.5,0.5]
     norm_std = [0.5,0.5,0.5]
-    batch_size = 64
+    batch_size = 32
+    print("batch_size", batch_size)
     learning_rate = 1e-3
     epochs = 200
     images_folder = "data/UTKFace/"
@@ -52,13 +53,13 @@ def main():
         image_paths.append(file_path)
     train_paths,val_paths = train_test_split(image_paths,test_size = 0.2)
     # data augmentation
-    train_transform = [transforms.RandomCrop(32, padding=4),
+    train_transform = [transforms.RandomResizedCrop(224),
                            transforms.RandomHorizontalFlip()]
     train_transform = transforms.Compose(train_transform + [
                      transforms.ToTensor(),
                      transforms.Normalize(norm_mean, norm_std)])
     
-    val_transform = transforms.Compose([transforms.Resize(32),
+    val_transform = transforms.Compose([transforms.Resize(224),
                      transforms.ToTensor(),
                      transforms.Normalize(norm_mean, norm_std)])
     
@@ -73,7 +74,7 @@ def main():
     # freez the other layer
     # for param in model.parameters():
     #       param.requires_grad = False
-    model.fc6 = torch.nn.Linear(in_features=512, out_features=512, bias=True) 
+    model.fc6 = torch.nn.Linear(in_features=25088, out_features=512, bias=True) 
     model.fc7 = torch.nn.Linear(in_features=512, out_features=1024, bias=True)
     model.fc8 = torch.nn.Linear(in_features=1024, out_features=5, bias=True)
     model = model.to(device)
