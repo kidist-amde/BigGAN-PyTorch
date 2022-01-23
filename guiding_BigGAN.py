@@ -26,6 +26,8 @@ class ConditionalBigGAN(nn.Module):
         self.classifier = classifier 
         self.output_dim = G.dim_z
         self.input_generator = InputGenerator(input_dim,self.output_dim)
+        # resize images (32,32)generated_images to (224,224)race_classfier
+        self.upsample = nn.UpsamplingNearest2d(size = 224)
     def forward(self,inputs):
         onehot_inputs = nn.functional.one_hot(inputs).float().squeeze(1)
         mu_sigma = self.input_generator(onehot_inputs)
@@ -38,6 +40,7 @@ class ConditionalBigGAN(nn.Module):
         z = mu+sigma * eps 
         # generat images 
         images = self.G(z,self.G.shared(inputs))  
+        images = self.upsample(images)
         outputs = self.classifier(images)
         return outputs
 class InputGenerator(nn.Module):
@@ -120,7 +123,7 @@ def main():
     #                              'km.jpg' ,
     #                             nrow=int(G_batch_size**0.5),
     #                              normalize=True)
-    race_classifier = torch.load("models/race_classfier.pt")
+    race_classifier = torch.load("models/race_classfier.pt")["model"]
     cGAN = ConditionalBigGAN(G,race_classifier,5)
     cGAN = cGAN.to(device)
     # freez model params
@@ -129,9 +132,9 @@ def main():
     for param in G.parameters():
         param.requires_grad=False         
     # generate input
-    inputs = torch.randint(0,5,size=(32,))
-    outputs = cGAN(inputs)
-    print(outputs.shape)
+    # inputs = torch.randint(0,5,size=(32,))
+    # outputs = cGAN(inputs)
+    # print(outputs.shape)
     train_dataset = DummyDataset(20000)
     validation_dataset = DummyDataset(5000)
     train_loader = DataLoader(train_dataset,batch_size = batch_size,shuffle = True,drop_last = True)
@@ -139,13 +142,17 @@ def main():
     optimizer =torch.optim.SGD(cGAN.input_generator.parameters(),lr = learning_rate,momentum=0.9)
     criterion = torch.nn.CrossEntropyLoss()
     # traning loop
+    best_acc = 0
     for epoch in range(epochs):
       train_loss,train_acc = train_epoch(cGAN,train_loader,optimizer,criterion)
       val_loss,val_acc = evaluate(cGAN,val_loader,criterion)
       # log 
       print("Epoch:{}/{} Train_loss:{:.4f} Train_acc:{:.2f}%".format(epoch+1,epochs,train_loss,train_acc*100))
       print("val_loss:{:.4f} val_acc:{:.2f}%".format(val_loss,val_acc*100))
-      
+    # save the best model
+    if val_acc>best_acc:
+        best_acc = val_acc
+        torch.save({"best_acc":best_acc,"model":cGAN,"epoch":epoch},"models/cGAN_best_model.pt")
 def get_race_classifier():
     model = Vgg_face_dag()
     state_dict = torch.load("vgg_face_dag.pth")
