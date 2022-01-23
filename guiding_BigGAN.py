@@ -1,7 +1,7 @@
 import functools
 import math
 import numpy as np
-from tqdm import tqdm, trange
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -120,8 +120,13 @@ def main():
                                  'km.jpg' ,
                                 nrow=int(G_batch_size**0.5),
                                  normalize=True)
-    model = get_race_classifier()
-    cGAN = ConditionalBigGAN(G,model,5)
+    race_classifier = torch.load("models/race_classfier.pt")
+    cGAN = ConditionalBigGAN(G,race_classifier,5)
+    # freez model params
+    for param in race_classifier.parameters():
+          param.requires_grad=False
+    for param in G.parameters():
+          param.requires_grad=False         
     # generate input
     inputs = torch.randint(0,5,size=(32,))
     outputs = cGAN(inputs)
